@@ -9,23 +9,12 @@ registry
         if (action.report_type === "py3o") {
             let url = `/report/py3o/${action.report_name}`;
             const actionContext = action.context || {};
-            if (
-                _.isUndefined(action.data) ||
-                _.isNull(action.data) ||
-                (_.isObject(action.data) && _.isEmpty(action.data))
-            ) {
-                // Build a query string with `action.data` (it's the place where reports
-                // using a wizard to customize the output traditionally put their options)
-                if (actionContext.active_ids) {
-                    var activeIDsPath = "/" + actionContext.active_ids.join(",");
-                    url += activeIDsPath;
-                }
-            } else {
-                var serializedOptionsPath =
-                    "?options=" + encodeURIComponent(JSON.stringify(action.data));
-                serializedOptionsPath +=
-                    "&context=" + encodeURIComponent(JSON.stringify(actionContext));
-                url += serializedOptionsPath;
+            if (action.data && JSON.stringify(action.data) !== "{}") {
+                const action_options = encodeURIComponent(JSON.stringify(action.data));
+                const context = encodeURIComponent(JSON.stringify(actionContext));
+                url += `?options=${action_options}&context=${context}`;
+            } else if (actionContext.active_ids) {
+                url += `/${actionContext.active_ids.join(",")}`;
             }
             env.services.ui.block();
             try {
